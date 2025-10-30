@@ -153,56 +153,47 @@
 
   <!-- 🔹 JS Logic -->
   <script>
-    const uploadBtn = document.getElementById('uploadBtn');
-    const uploadStatus = document.getElementById('uploadStatus');
-    const videoFileInput = document.getElementById('videoFile');
-    const previewContainer = document.getElementById('previewContainer');
-    const videoPreview = document.getElementById('videoPreview');
+  document.getElementById("uploadBtn").addEventListener("click", async () => {
+    const title = document.getElementById("videoTitle").value.trim();
+    const description = document.getElementById("videoDesc").value.trim();
+    const tags = document.getElementById("videoTags").value.trim();
+    const embedUrl = document.getElementById("embedLink").value.trim();
 
-    videoFileInput.addEventListener('change', () => {
-      const file = videoFileInput.files[0];
-      if (file) {
-        const url = URL.createObjectURL(file);
-        previewContainer.style.display = 'block';
-        videoPreview.src = url;
+    if (!title) return alert("Please enter a title!");
+    if (!embedUrl) return alert("Please provide an embed link!");
+
+    const videoData = {
+      title,
+      description,
+      tags,
+      thumbnail: "",
+      embedUrl,
+    };
+
+    const uploadStatus = document.getElementById("uploadStatus");
+    uploadStatus.style.display = "block";
+    uploadStatus.textContent = "Uploading...";
+
+    try {
+      const res = await fetch("/api/videos/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(videoData),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        uploadStatus.textContent = "✅ Uploaded successfully!";
+        setTimeout(() => (window.location.href = "index.html"), 1000);
+      } else {
+        uploadStatus.textContent = "❌ Upload failed: " + data.error;
       }
-    });
+    } catch (err) {
+      console.error(err);
+      uploadStatus.textContent = "❌ Error during upload.";
+    }
+  });
+</script>
 
-    uploadBtn.addEventListener('click', async () => {
-      const title = document.getElementById('videoTitle').value.trim();
-      const desc = document.getElementById('videoDesc').value.trim();
-      const tags = document.getElementById('videoTags').value.trim();
-      const videoFile = document.getElementById('videoFile').files[0];
-      const thumbnail = document.getElementById('thumbnailFile').files[0];
-      const embedLink = document.getElementById('embedLink').value.trim();
-
-      if (!title) return alert('Please enter a title.');
-      if (!videoFile && !embedLink) return alert('Please upload a video or add an embed link.');
-
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('description', desc);
-      formData.append('tags', tags);
-      if (videoFile) formData.append('video', videoFile);
-      if (thumbnail) formData.append('thumbnail', thumbnail);
-      if (embedLink) formData.append('embedLink', embedLink);
-
-      uploadStatus.style.display = 'block';
-      uploadStatus.textContent = 'Uploading...';
-
-      try {
-        const res = await fetch('/api/videos/add', { method: 'POST', body: formData });
-        if (res.ok) {
-          uploadStatus.textContent = '✅ Uploaded successfully!';
-          setTimeout(() => (window.location.href = 'index.html'), 1000);
-        } else {
-          uploadStatus.textContent = '❌ Upload failed.';
-        }
-      } catch (err) {
-        console.error(err);
-        uploadStatus.textContent = '❌ Error during upload.';
-      }
-    });
-  </script>
 </body>
 </html>
