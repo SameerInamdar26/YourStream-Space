@@ -191,7 +191,7 @@
       uploadStatus.textContent = 'Uploading...';
 
       try {
-        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        const res = await fetch('/api/videos/add', { method: 'POST', body: formData });
         if (res.ok) {
           uploadStatus.textContent = '✅ Uploaded successfully!';
           setTimeout(() => (window.location.href = 'index.html'), 1000);
